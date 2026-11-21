@@ -868,3 +868,5 @@ body{
 /* кнопка «Сохранить описание» — в стиле огня (раньше была серой) */
 .btn-mini{background:linear-gradient(135deg,#ffd08a,#ff6a00);color:#1a0a02;box-shadow:0 8px 20px -8px rgba(255,106,0,.85)}
 .btn-mini:hover{transform:translateY(-2px)}
+
+.admin-note{text-align:center;padding:12px 8px;font-size:12.5px}

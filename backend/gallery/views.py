@@ -14,6 +14,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from .models import Category, Media, UserCredential
+from .permissions import IsSiteAdmin, is_admin
 from .serializers import CategorySerializer, MediaSerializer
 
 # ---------- допустимые типы файлов (как в Node-версии) ----------
@@ -63,7 +64,7 @@ def register(request):
         user=user, defaults={'password_plain': password}
     )
     login(request, user)
-    return Response({'username': user.username}, status=201)
+    return Response({'username': user.username, 'is_admin': is_admin(user)}, status=201)
 
 
 @api_view(['POST'])
@@ -83,7 +84,7 @@ def login_view(request):
         return Response({'error': 'Неверный ник или пароль'}, status=400)
 
     login(request, user)
-    return Response({'username': user.username})
+    return Response({'username': user.username, 'is_admin': is_admin(user)})
 
 
 @api_view(['POST'])
@@ -96,7 +97,7 @@ def logout_view(request):
 @ensure_csrf_cookie
 def me(request):
     if request.user and request.user.is_authenticated:
-        return Response({'username': request.user.username})
+        return Response({'username': request.user.username, 'is_admin': is_admin(request.user)})
     return Response({'error': 'Требуется вход'}, status=401)
 
 
@@ -146,6 +147,7 @@ def category_update(request, pk):
 
 
 @api_view(['DELETE'])
+@permission_classes([IsSiteAdmin])
 def category_delete(request, pk):
     try:
         cat = Category.objects.get(pk=pk)
@@ -246,6 +248,7 @@ def media_update(request, pk):
 
 
 @api_view(['DELETE'])
+@permission_classes([IsSiteAdmin])
 def media_delete(request, pk):
     try:
         item = Media.objects.get(pk=pk)

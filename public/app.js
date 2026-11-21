@@ -11,6 +11,7 @@ let currentList = [];
 let currentIndex = -1;
 let selectedFiles = [];
 let selectedCats = new Set();
+let isAdmin = false;   // удалять посты и категории может только админ (проверяется и на сервере)
 
 /* ---------- auth helpers ---------- */
 function getCookie(n){
@@ -47,10 +48,10 @@ async function jjson(url, opts = {}) {
 const api = {
   async cats() { return jjson('/api/categories'); },
   async createCat(data) { return jjson('/api/categories', { method: 'POST', body: JSON.stringify(data) }); },
-  async delCat(id) { await j('/api/categories/' + id + '/delete', { method: 'DELETE' }); },
+  async delCat(id) { return jjson('/api/categories/' + id + '/delete', { method: 'DELETE' }); },
   async list(params = '') { return jjson('/api/media' + params); },
   async patchMedia(id, data) { return jjson('/api/media/' + id, { method: 'PATCH', body: JSON.stringify(data) }); },
-  async delMedia(id) { await j('/api/media/' + id + '/delete', { method: 'DELETE' }); }
+  async delMedia(id) { return jjson('/api/media/' + id + '/delete', { method: 'DELETE' }); }
 };
 
 /* ---------- hanabi canvas ---------- */
@@ -416,6 +417,7 @@ function renderViewer() {
   $('#vTitle').textContent = m.title || '';
   $('#vDesc').value = m.description || '';
   $('#vOpen').href = m.url;
+  $('#vDelete').style.display = isAdmin ? '' : 'none';
   $('#vMeta').innerHTML = `
     <div><b>Тип:</b> ${m.kind === 'video' ? 'видео' : 'фото'} · ${m.mime || ''}</div>
     <div><b>Размер:</b> ${fmtSize(m.size)}</div>
@@ -444,25 +446,29 @@ function renderViewer() {
 async function toggleCat(catId) {
   const m = currentList[currentIndex];
   if (!m) return;
+  const c = catById(catId);
+  if (!c) return;
   const set = new Set(m.categories || []);
   const adding = !set.has(catId);
   adding ? set.add(catId) : set.delete(catId);
-  m.categories = [...set];
-  const c = catById(catId);
   try {
     await api.patchMedia(m.id, { categories: [...set] });
-    const full = media.find(x => x.id === m.id);
-    if (full) full.categories = [...set];
-    renderViewer();
-    renderChips(); renderStats(); renderGallery();
-    // keep viewer index valid after re-render
-    const idx = currentList.findIndex(x => x.id === m.id);
-    if (idx >= 0) currentIndex = idx;
-    else closeViewer(); // media left the current filter
-    toast(adding ? `Добавлено: ${c.emoji} ${c.name}` : `Убрано: ${c.emoji} ${c.name}`);
   } catch (e) {
-    toast('Ошибка сохранения', true);
+    return toast('Ошибка сохранения', true);
   }
+  const full = media.find(x => x.id === m.id);
+  if (full) full.categories = [...set];
+  m.categories = [...set];
+  renderChips(); renderStats(); renderGallery();     // пересобирает currentList
+  // если пост «ушёл» из текущего фильтра — оставляем его открытым, чтобы можно было нажать ещё раз
+  let idx = currentList.findIndex(x => x.id === m.id);
+  if (idx < 0 && full) {
+    idx = Math.min(currentIndex, currentList.length);
+    currentList.splice(idx, 0, full);
+  }
+  currentIndex = Math.max(idx, 0);
+  renderViewer();
+  toast(adding ? `Добавлено: ${c.emoji} ${c.name}` : `Убрано: ${c.emoji} ${c.name}`);
 }
 
 $('#saveDesc').onclick = async () => {
@@ -484,8 +490,10 @@ $('#vTitle').addEventListener('keydown', e => {
 $('#vDelete').onclick = async () => {
   const m = currentList[currentIndex];
   if (!m) return;
+  if (!isAdmin) return toast('Удалять может только админ', true);
   if (!confirm('Удалить «' + (m.title || '') + '» безвозвратно?')) return;
-  await api.delMedia(m.id);
+  try { await api.delMedia(m.id); }
+  catch (e) { return toast(e.message, true); }
   media = media.filter(x => x.id !== m.id);
   toast('Удалено');
   const wasLen = currentList.length;
@@ -523,13 +531,15 @@ function renderCatList() {
       <div class="sw" style="--c:${c.color};background:${c.color}">${escapeHtml(c.emoji)}</div>
       <div class="nm">${escapeHtml(c.name)}</div>
       <div class="cnt2">${counts[c.id] || 0} медиа</div>
-      <button class="del" data-id="${c.id}" title="Удалить">🗑</button>
+      ${isAdmin ? `<button class="del" data-id="${c.id}" title="Удалить">🗑</button>` : ''}
     </div>`).join('') || '<div class="mine-empty">Категорий нет</div>';
+  if (!isAdmin && categories.length) $('#catList').insertAdjacentHTML('beforeend', '<div class="mine-empty admin-note">🔒 Удалять категории может только админ</div>');
 
   $$('#catList .del').forEach(b => b.onclick = async () => {
     const c = catById(b.dataset.id);
     if (!confirm(`Удалить категорию «${c.name}»? Она пропадёт со всех медиа.`)) return;
-    await api.delCat(c.id);
+    try { await api.delCat(c.id); }
+    catch (e) { return toast(e.message, true); }
     categories = categories.filter(x => x.id !== c.id);
     media.forEach(m => m.categories = (m.categories || []).filter(id => id !== c.id));
     if (filterCat === c.id) filterCat = 'all';
@@ -599,7 +609,8 @@ function fmtSize(b) {
     if (!r.ok) { location.replace('/login/'); return; }
     const me = await r.json();
     const who = $('#whoami');
-    if (who) who.textContent = '👤 ' + me.username;
+    isAdmin = !!me.is_admin;
+    if (who) who.textContent = (isAdmin ? '👑 ' : '👤 ') + me.username;
   } catch (e) {
     location.replace('/login/');
     return;

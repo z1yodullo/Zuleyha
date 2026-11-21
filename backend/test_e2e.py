@@ -176,9 +176,20 @@ def main():
     r = s.post(BASE + '/api/media', data={'title': 'пусто'}, headers=H)
     check('загрузка без файлов -> 400', r.status_code == 400)
 
-    # удаление
+    # удаление: обычному пользователю нельзя, только админу
+    r = s.get(BASE + '/api/auth/me')
+    check('/me: is_admin = False у обычного', r.json().get('is_admin') is False)
     r = s.delete(BASE + '/api/media/' + created['id'] + '/delete', headers=H)
-    check('DELETE медиа', r.status_code == 200)
+    check('DELETE медиа обычным -> 403', r.status_code == 403, f'{r.status_code}')
+    check('403 содержит error', 'error' in r.json())
+    r = s.delete(BASE + '/api/categories/' + new_cat['id'] + '/delete', headers=H)
+    check('DELETE категории обычным -> 403', r.status_code == 403, f'{r.status_code}')
+    import subprocess
+    subprocess.run([sys.executable, str(ROOT / 'backend' / 'manage.py'), 'make_admin', nick], check=True, capture_output=True)
+    r = s.get(BASE + '/api/auth/me')
+    check('/me: is_admin = True после make_admin', r.json().get('is_admin') is True)
+    r = s.delete(BASE + '/api/media/' + created['id'] + '/delete', headers=H)
+    check('DELETE медиа админом', r.status_code == 200)
     r = s.get(BASE + '/api/media')
     check('после удаления как в начале', len(r.json()) == media0, f'{len(r.json())} != {media0}')
     r = s.delete(BASE + '/api/categories/' + new_cat['id'] + '/delete', headers=H)
