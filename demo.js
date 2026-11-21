@@ -80,7 +80,7 @@ function makeArt(w, h, style) {
         t = Math.sqrt(dx * dx + dy * dy) * 1.5 + Math.sin(Math.atan2(dy, dx) * 5 + t0) * 0.1;
       } else if (style % 5 === 3) {     // waves
         t = 0.5 + Math.sin(u * 5 + Math.sin(v * 3 + t0) * 1.6) * 0.28 + (v - 0.5) * 0.35;
-      } else {                          // ember field
+      } else {                          // hanabi field
         t = 0.35 + Math.sin((u + v) * 4 + t0) * 0.18 + v * 0.3;
       }
 
@@ -111,7 +111,7 @@ function makeArt(w, h, style) {
       const vig = 1 - Math.pow(Math.max(Math.abs(u - 0.5), Math.abs(v - 0.5)) * 1.7, 2.4);
       const grain = (rnd() - 0.5) * 13 * (0.35 + 0.65 * Math.max(0.15, vig));
       const k = Math.max(0.15, vig);
-      // warm shadows: darkening pulls toward ember brown, never neutral gray
+      // warm shadows: darkening pulls toward hanabi brown, never neutral gray
       const wgt = 1 - k;
       r *= k; g *= k * (1 - 0.10 * wgt); b *= k * (1 - 0.26 * wgt);
       // proportional highlight roll-off: keeps hue orange instead of clipping to yellow

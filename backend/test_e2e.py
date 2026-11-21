@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""E2E тесты EMBER (DRF-версия): гейтинг, auth, CRUD, кириллица."""
+"""E2E тесты HANABI (DRF-версия): гейтинг, auth, CRUD, кириллица."""
 import sys
 import uuid
 from pathlib import Path
@@ -94,7 +94,7 @@ def main():
     # ---------- 4. ПОСЛЕ ВХОДА ----------
     print('\n[4] Доступ после входа')
     r = s.get(BASE + '/')
-    check('GET / -> 200 (index.html)', r.status_code == 200 and 'EMBER' in r.text)
+    check('GET / -> 200 (index.html)', r.status_code == 200 and 'HANABI' in r.text)
     r = s.get(BASE + '/api/media')
     check('GET /api/media -> 200', r.status_code == 200)
     media = r.json()

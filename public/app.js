@@ -1,4 +1,4 @@
-/* ================= EMBER app ================= */
+/* ================= HANABI app ================= */
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 
@@ -53,9 +53,9 @@ const api = {
   async delMedia(id) { await j('/api/media/' + id + '/delete', { method: 'DELETE' }); }
 };
 
-/* ---------- embers canvas ---------- */
-(function embers() {
-  const c = $('#embers'), ctx = c.getContext('2d');
+/* ---------- hanabi canvas ---------- */
+(function hanabi() {
+  const c = $('#hanabi'), ctx = c.getContext('2d');
   let W, H, parts = [];
   function resize() {
     W = c.width = innerWidth; H = c.height = innerHeight;
@@ -123,10 +123,10 @@ function catById(id) { return categories.find(c => c.id === id); }
 function renderChips() {
   const counts = {};
   media.forEach(m => (m.categories || []).forEach(id => counts[id] = (counts[id] || 0) + 1));
-  const types = [['all', 'Всё', '🔥'], ['photo', 'Фото', '🖼️'], ['video', 'Видео', '🎬']];
+  const types = [['all', 'Категории', '🗂️'], ['photo', 'Фото', '🖼️'], ['video', 'Видео', '🎬']];
   let html = types.map(([v, l, e]) =>
     `<button class="chip ${filterType === v && filterCat === 'all' ? 'on' : ''}" data-type="${v}" data-cat="all">
-      ${e} ${l}<span class="n">${v === 'all' ? media.length : media.filter(m => m.kind === v).length}</span>
+      ${e} ${l}<span class="n">${v === 'all' ? categories.length : media.filter(m => m.kind === v).length}</span>
     </button>`).join('');
 
   html += `<button class="chip ${filterCat !== 'all' ? '' : ''}" data-cat="__all__" style="opacity:.55;pointer-events:none">—</button>`;
@@ -154,7 +154,8 @@ function renderChips() {
 /* ---------- gallery ---------- */
 function applyFilters() {
   let list = media.slice();
-  if (filterCat !== 'all') list = list.filter(m => (m.categories || []).includes(filterCat));
+  if (filterCat === '__none__') list = list.filter(m => !(m.categories || []).some(id => catById(id)));
+  else if (filterCat !== 'all') list = list.filter(m => (m.categories || []).includes(filterCat));
   if (filterType !== 'all') list = list.filter(m => m.kind === filterType);
   if (query) {
     const s = query.toLowerCase();
@@ -165,9 +166,72 @@ function applyFilters() {
   return list;
 }
 
+function isRoot() { return filterCat === 'all' && filterType === 'all'; }
+
+/* папки-категории: превью последних файлов внутри, как в Проводнике */
+function folderList() {
+  const s = query.toLowerCase();
+  const hit = m => (m.title || '').toLowerCase().includes(s) || (m.description || '').toLowerCase().includes(s);
+  const list = categories.map(c => ({ c, items: media.filter(m => (m.categories || []).includes(c.id)) }));
+  const none = media.filter(m => !(m.categories || []).some(id => catById(id)));
+  if (none.length) list.push({ c: { id: '__none__', name: 'Без категории', emoji: '📁', color: '#9a7b66' }, items: none });
+  return s ? list.filter(f => f.c.name.toLowerCase().includes(s) || f.items.some(hit)) : list;
+}
+
+function folderHTML(f, i) {
+  const photos = f.items.filter(m => m.kind === 'photo');
+  const videos = f.items.filter(m => m.kind === 'video');
+  const pics = [...photos, ...videos].slice(0, 3);
+  const pv = pics.map((m, k) => m.kind === 'video'
+    ? `<div class="fd-pic p${k + 1}"><video src="${m.url}#t=0.1" muted playsinline preload="metadata"></video></div>`
+    : `<div class="fd-pic p${k + 1}"><img src="${m.url}" alt="" loading="lazy"></div>`).join('');
+  return `
+  <article class="folder" data-id="${f.c.id}" style="--c:${f.c.color};animation-delay:${Math.min(i * 60, 600)}ms">
+    <div class="fd">
+      <div class="fd-back"></div>
+      <div class="fd-pics">${pv}</div>
+      <div class="fd-front"><span class="fd-emoji">${escapeHtml(f.c.emoji)}</span></div>
+    </div>
+    <div class="fd-name">${escapeHtml(f.c.name)}</div>
+    <div class="fd-count">${f.items.length} медиа</div>
+  </article>`;
+}
+
+function renderCrumbs() {
+  const el = $('#crumbs');
+  if (isRoot()) { el.hidden = true; el.innerHTML = ''; return; }
+  let label;
+  if (filterCat === '__none__') label = '📁 Без категории';
+  else if (filterCat !== 'all') { const c = catById(filterCat); label = c ? `${c.emoji} ${c.name}` : ''; }
+  else label = filterType === 'photo' ? '🖼️ Все фото' : '🎬 Все видео';
+  el.hidden = false;
+  el.innerHTML = `<button class="btn btn-ghost" id="crumbBack">← Категории</button>
+    <span class="crumb-cur">${escapeHtml(label)}</span><span class="crumb-n">${currentList.length}</span>`;
+  $('#crumbBack').onclick = () => { filterCat = 'all'; filterType = 'all'; renderChips(); renderGallery(); };
+}
+
 function renderGallery() {
   currentList = applyFilters();
   const g = $('#gallery');
+  const root = isRoot();
+  g.classList.toggle('folders', root);
+  $('#filters').classList.toggle('is-root', root);
+  document.body.classList.toggle('in-cat', !root);
+  $('#dockHome').classList.toggle('on', root);
+  renderCrumbs();
+
+  if (root) {
+    const folders = folderList();
+    $('#empty').hidden = folders.length > 0;
+    g.innerHTML = folders.map(folderHTML).join('');
+    $$('#gallery .folder').forEach(el => el.onclick = () => {
+      filterCat = el.dataset.id; filterType = 'all';
+      renderChips(); renderGallery();
+      $('#filters').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    return;
+  }
+
   $('#empty').hidden = currentList.length > 0;
   g.innerHTML = currentList.map((m, i) => {
     const cats = (m.categories || []).map(id => catById(id)).filter(Boolean);
@@ -490,6 +554,30 @@ $('#mAddCat').onclick = async () => {
     toast('Категория создана');
   } catch (e) { toast(e.message, true); }
 };
+
+/* ================= MOBILE: dock + свайпы ================= */
+$('#dockHome').onclick = () => {
+  filterCat = 'all'; filterType = 'all'; query = ''; $('#search').value = '';
+  renderChips(); renderGallery();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+$('#dockAdd').onclick = openUpload;
+$('#dockCats').onclick = () => { $('#catModal').classList.add('show'); renderCatList(); };
+
+(function swipe() {
+  const v = $('#viewer');
+  let x0 = null, y0 = null;
+  v.addEventListener('touchstart', e => {
+    if (e.touches.length !== 1 || !e.target.closest('.viewer-stage') || e.target.tagName === 'VIDEO') { x0 = null; return; }
+    x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
+  }, { passive: true });
+  v.addEventListener('touchend', e => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
+    x0 = null;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) step(dx < 0 ? 1 : -1);
+  }, { passive: true });
+})();
 
 /* ---------- utils ---------- */
 function escapeHtml(s) {

@@ -2,8 +2,14 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EMBER · Галерея</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#120703">
+<meta name="color-scheme" content="dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="HANABI">
+<title>HANABI · Галерея</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -12,13 +18,13 @@
 </head>
 <body>
 
-<canvas id="embers"></canvas>
+<canvas id="hanabi"></canvas>
 <div class="aurora"></div>
 
 <header class="topbar">
   <div class="logo">
     <span class="logo-mark">🔥</span>
-    <span class="logo-text">EMBER<span class="logo-dot">.</span></span>
+    <span class="logo-text">HANABI<span class="logo-dot">.</span></span>
     <span class="logo-sub">галерея</span>
   </div>
 
@@ -29,19 +35,19 @@
 
   <div class="userbox">
     <span class="whoami" id="whoami"></span>
-    <button class="btn btn-ghost" id="btnLogout" title="Выйти">⏻ Выйти</button>
+    <button class="btn btn-ghost" id="btnLogout" title="Выйти" aria-label="Выйти"><span class="ic">⏻</span><span class="lbl">Выйти</span></button>
   </div>
 
   <button class="btn btn-fire" id="btnUpload">
-    <span class="btn-ic">＋</span> Загрузить
+    <span class="btn-ic">＋</span><span class="lbl">Загрузить</span>
   </button>
 </header>
 
 <section class="hero">
   <div class="hero-inner">
     <h1 class="hero-title">
-      <span class="line">Твои <em>моменты</em>,</span>
-      <span class="line">в тёплом <em>свете</em>.</span>
+      <span class="line">Фотки не <em>смогут</em>,</span>
+      <span class="line">передать всю <em>вашу красоту</em>.</span>
     </h1>
     <p class="hero-sub">Фото и видео. Категории. Всё в одном огне.</p>
     <div class="stats" id="stats">
@@ -60,6 +66,8 @@
     <button class="vt" data-v="masonry" title="Каскад">▤</button>
   </div>
 </nav>
+
+<div class="crumbs" id="crumbs" hidden></div>
 
 <main class="gallery" id="gallery"></main>
 
@@ -171,8 +179,15 @@
 
 <button class="fab" id="fabCats" title="Управление категориями">🏷️</button>
 
+<nav class="dock" id="dock" aria-label="Навигация">
+  <button class="dock-b on" id="dockHome" type="button"><span>🗂️</span><i>Категории</i></button>
+  <button class="dock-add" id="dockAdd" type="button" aria-label="Загрузить">＋</button>
+  <button class="dock-b" id="dockCats" type="button"><span>🏷️</span><i>Управление</i></button>
+</nav>
+
 <div class="toast" id="toast"></div>
 
+<script src="rain.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

@@ -224,6 +224,6 @@ app.use((err, req, res, next) => {
 seedIfNeeded();
 
 app.listen(PORT, () => {
-  console.log(`\n  🔥 EMBER GALLERY`);
+  console.log(`\n  🔥 HANABI GALLERY`);
   console.log(`  → http://localhost:${PORT}\n`);
 });
