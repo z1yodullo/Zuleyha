@@ -12,27 +12,45 @@ let currentIndex = -1;
 let selectedFiles = [];
 let selectedCats = new Set();
 
+/* ---------- auth helpers ---------- */
+function getCookie(n){
+  const m = document.cookie.match(new RegExp('(?:^|; )' + n + '=([^;]*)'));
+  return m ? decodeURIComponent(m[1]) : '';
+}
+
+async function j(url, opts = {}) {
+  opts.headers = { ...(opts.headers || {}) };
+  const method = (opts.method || 'GET').toUpperCase();
+  if (opts.body && typeof opts.body === 'string' && !opts.headers['Content-Type']) {
+    opts.headers['Content-Type'] = 'application/json';
+  }
+  if (method !== 'GET' && method !== 'HEAD') {
+    const token = getCookie('csrftoken');
+    if (token) opts.headers['X-CSRFToken'] = token;
+  }
+  const r = await fetch(url, opts);
+  if (r.status === 401) {
+    location.replace('/login/');
+    throw new Error('Требуется вход');
+  }
+  return r;
+}
+
+async function jjson(url, opts = {}) {
+  const r = await j(url, opts);
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.error || 'Ошибка (' + r.status + ')');
+  return data;
+}
+
 /* ---------- API ---------- */
 const api = {
-  async cats() { const r = await fetch('/api/categories'); return r.json(); },
-  async createCat(data) {
-    const r = await fetch('/api/categories', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-    if (!r.ok) throw new Error((await r.json()).error);
-    return r.json();
-  },
-  async delCat(id) { await fetch('/api/categories/' + id, { method: 'DELETE' }); },
-  async list(params = '') { const r = await fetch('/api/media' + params); return r.json(); },
-  async patchMedia(id, data) {
-    const r = await fetch('/api/media/' + id, {
-      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-    return r.json();
-  },
-  async delMedia(id) { await fetch('/api/media/' + id, { method: 'DELETE' }); }
+  async cats() { return jjson('/api/categories'); },
+  async createCat(data) { return jjson('/api/categories', { method: 'POST', body: JSON.stringify(data) }); },
+  async delCat(id) { await j('/api/categories/' + id + '/delete', { method: 'DELETE' }); },
+  async list(params = '') { return jjson('/api/media' + params); },
+  async patchMedia(id, data) { return jjson('/api/media/' + id, { method: 'PATCH', body: JSON.stringify(data) }); },
+  async delMedia(id) { await j('/api/media/' + id + '/delete', { method: 'DELETE' }); }
 };
 
 /* ---------- embers canvas ---------- */
@@ -273,10 +291,13 @@ $('#doUpload').onclick = () => {
 
   const xhr = new XMLHttpRequest();
   xhr.open('POST', '/api/media');
+  const csrf = getCookie('csrftoken');
+  if (csrf) xhr.setRequestHeader('X-CSRFToken', csrf);
   xhr.upload.onprogress = e => { if (e.lengthComputable) bar.style.width = (e.loaded / e.total * 100) + '%'; };
   xhr.onload = async () => {
     $('#doUpload').disabled = false; $('#doUpload').textContent = '🔥 Загрузить';
     prog.classList.remove('show');
+    if (xhr.status === 401) { location.replace('/login/'); return; }
     if (xhr.status >= 200 && xhr.status < 300) {
       const created = JSON.parse(xhr.responseText);
       media = [...created, ...media];
@@ -483,5 +504,24 @@ function fmtSize(b) {
   return n.toFixed(n < 10 && i > 0 ? 1 : 0) + ' ' + u[i];
 }
 
-/* ---------- boot ---------- */
-loadAll().catch(e => toast('Ошибка загрузки: ' + e.message, true));
+/* ---------- boot: сначала вход ---------- */
+(async function boot() {
+  try {
+    const r = await fetch('/api/auth/me');
+    if (!r.ok) { location.replace('/login/'); return; }
+    const me = await r.json();
+    const who = $('#whoami');
+    if (who) who.textContent = '👤 ' + me.username;
+  } catch (e) {
+    location.replace('/login/');
+    return;
+  }
+
+  const out = $('#btnLogout');
+  if (out) out.onclick = async () => {
+    try { await j('/api/auth/logout', { method: 'POST' }); } catch (e) {}
+    location.replace('/login/');
+  };
+
+  loadAll().catch(e => toast('Ошибка загрузки: ' + e.message, true));
+})();
