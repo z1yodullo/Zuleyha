@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EMBER · Галерея</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
+</head>
+<body>
+
+<canvas id="embers"></canvas>
+<div class="aurora"></div>
+
+<header class="topbar">
+  <div class="logo">
+    <span class="logo-mark">🔥</span>
+    <span class="logo-text">EMBER<span class="logo-dot">.</span></span>
+    <span class="logo-sub">галерея</span>
+  </div>
+
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24" class="search-ic"><path d="M10 4a6 6 0 104.9 9.5l4.3 4.3 1.4-1.4-4.3-4.3A6 6 0 0010 4zm0 2a4 4 0 110 8 4 4 0 010-8z"/></svg>
+    <input id="search" type="search" placeholder="Поиск по названию и описанию..." autocomplete="off">
+  </div>
+
+  <button class="btn btn-fire" id="btnUpload">
+    <span class="btn-ic">＋</span> Загрузить
+  </button>
+</header>
+
+<section class="hero">
+  <div class="hero-inner">
+    <h1 class="hero-title">
+      <span class="line">Твои <em>моменты</em>,</span>
+      <span class="line">в тёплом <em>свете</em>.</span>
+    </h1>
+    <p class="hero-sub">Фото и видео. Категории. Всё в одном огне.</p>
+    <div class="stats" id="stats">
+      <div class="stat"><b id="statMedia">0</b><span>медиа</span></div>
+      <div class="stat"><b id="statPhotos">0</b><span>фото</span></div>
+      <div class="stat"><b id="statVideos">0</b><span>видео</span></div>
+      <div class="stat"><b id="statCats">0</b><span>категорий</span></div>
+    </div>
+  </div>
+</section>
+
+<nav class="filters" id="filters">
+  <div class="chips" id="chips"></div>
+  <div class="view-toggle">
+    <button class="vt active" data-v="grid" title="Сетка">▦</button>
+    <button class="vt" data-v="masonry" title="Каскад">▤</button>
+  </div>
+</nav>
+
+<main class="gallery" id="gallery"></main>
+
+<div class="empty" id="empty" hidden>
+  <div class="empty-ic">🌅</div>
+  <h3>Пусто... пока</h3>
+  <p>Закинь первое фото или видео — и оно загорится здесь.</p>
+  <button class="btn btn-fire" onclick="openUpload()">＋ Загрузить медиа</button>
+</div>
+
+<!-- ===== UPLOAD MODAL ===== -->
+<div class="overlay" id="uploadModal">
+  <div class="modal">
+    <button class="x" onclick="closeUpload()">✕</button>
+    <h2 class="modal-title">Загрузка в огонь <span>🔥</span></h2>
+
+    <div class="drop" id="drop">
+      <input type="file" id="fileInput" multiple accept="image/*,video/*" hidden>
+      <div class="drop-ic">⬆</div>
+      <div class="drop-txt"><b>Перетащи файлы сюда</b><span>или нажми, чтобы выбрать · фото и видео</span></div>
+      <div class="drop-preview" id="dropPreview"></div>
+    </div>
+
+    <label class="field">
+      <span>Название</span>
+      <input type="text" id="fTitle" placeholder="Например: Закат на море">
+    </label>
+
+    <label class="field">
+      <span>Описание</span>
+      <textarea id="fDesc" rows="3" placeholder="Расскажи, что здесь происходит..."></textarea>
+    </label>
+
+    <div class="field">
+      <span>Категории <i class="hint">— выбери, к чему принадлежит</i></span>
+      <div class="cat-picker" id="uploadCats"></div>
+      <div class="new-cat">
+        <input type="text" id="newCatName" placeholder="Новая категория">
+        <input type="text" id="newCatEmoji" placeholder="🔥" maxlength="4" class="emoji-in">
+        <input type="color" id="newCatColor" value="#f97316" class="color-in">
+        <button class="btn btn-ghost" id="addCatBtn">Создать</button>
+      </div>
+    </div>
+
+    <div class="progress" id="progress"><div class="bar" id="bar"></div></div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeUpload()">Отмена</button>
+      <button class="btn btn-fire" id="doUpload">🔥 Загрузить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== VIEWER MODAL ===== -->
+<div class="overlay overlay-dark" id="viewer">
+  <button class="v-nav prev" id="vPrev">‹</button>
+  <button class="v-nav next" id="vNext">›</button>
+  <button class="x x-light" onclick="closeViewer()">✕</button>
+
+  <div class="viewer-wrap">
+    <div class="viewer-stage" id="vStage"></div>
+
+    <aside class="viewer-side">
+      <div class="v-kind" id="vKind"></div>
+      <h2 class="v-title" id="vTitle" contenteditable="true" spellcheck="false"></h2>
+
+      <div class="v-desc-wrap">
+        <label>Описание</label>
+        <textarea id="vDesc" rows="5" placeholder="Добавь описание..."></textarea>
+        <button class="btn btn-mini" id="saveDesc">Сохранить описание</button>
+      </div>
+
+      <div class="v-cats-wrap">
+        <label>Категории <i class="hint">— кликни, чтобы добавить или убрать</i></label>
+        <div class="v-cats" id="vCats"></div>
+        <div class="v-mine">
+          <b>На медиа:</b>
+          <div class="v-mine-list" id="vMine"></div>
+        </div>
+      </div>
+
+      <div class="v-meta" id="vMeta"></div>
+
+      <div class="v-actions">
+        <a class="btn btn-ghost" id="vOpen" target="_blank" rel="noopener">Открыть оригинал ↗</a>
+        <button class="btn btn-danger" id="vDelete">Удалить</button>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- ===== CATEGORY MANAGER ===== -->
+<div class="overlay" id="catModal">
+  <div class="modal modal-sm">
+    <button class="x" onclick="closeCats()">✕</button>
+    <h2 class="modal-title">Категории <span>🏷️</span></h2>
+    <div class="cat-list" id="catList"></div>
+    <div class="new-cat big">
+      <input type="text" id="mCatName" placeholder="Имя новой категории">
+      <input type="text" id="mCatEmoji" placeholder="✨" maxlength="4" class="emoji-in">
+      <input type="color" id="mCatColor" value="#f97316" class="color-in">
+      <button class="btn btn-fire" id="mAddCat">＋ Создать</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeCats()">Готово</button>
+    </div>
+  </div>
+</div>
+
+<button class="fab" id="fabCats" title="Управление категориями">🏷️</button>
+
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

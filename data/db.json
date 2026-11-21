@@ -1,0 +1,216 @@
+{
+  "media": [
+    {
+      "id": "m-demo-0",
+      "kind": "photo",
+      "url": "/uploads/3dc15567806a0db89bafa8a6.png",
+      "name": "demo-1.png",
+      "size": 1157399,
+      "mime": "image/png",
+      "title": "Закат над пустыней",
+      "description": "Последние лучи солнца окрасили небо в цвета угля и мёда. Стоило дождаться всего пять минут.",
+      "categories": [
+        "cat-nature",
+        "cat-travel"
+      ],
+      "createdAt": 1795164148792
+    },
+    {
+      "id": "m-demo-1",
+      "kind": "photo",
+      "url": "/uploads/e9abc9c85389fdf8eae9746d.png",
+      "name": "demo-2.png",
+      "size": 1278493,
+      "mime": "image/png",
+      "title": "Утренний свет в окне",
+      "description": "Тёплый свет сквозь стекло — начало дня, которое не хочется пропускать.",
+      "categories": [
+        "cat-people"
+      ],
+      "createdAt": 1795167748792
+    },
+    {
+      "id": "m-demo-2",
+      "kind": "photo",
+      "url": "/uploads/7359462b4791200829f9c3e3.png",
+      "name": "demo-3.png",
+      "size": 1120799,
+      "mime": "image/png",
+      "title": "Огни ночного города",
+      "description": "Фонари расплавились в один большой костёр на асфальте.",
+      "categories": [
+        "cat-night",
+        "cat-travel"
+      ],
+      "createdAt": 1795171348792
+    },
+    {
+      "id": "m-demo-3",
+      "kind": "photo",
+      "url": "/uploads/2a586fecf15edf678c375b32.png",
+      "name": "demo-4.png",
+      "size": 1478634,
+      "mime": "image/png",
+      "title": "Рассвет у моря",
+      "description": "Волны подхватили оранжевый и разнесли его по всей бухте.",
+      "categories": [
+        "cat-nature"
+      ],
+      "createdAt": 1795174948792
+    },
+    {
+      "id": "m-demo-4",
+      "kind": "photo",
+      "url": "/uploads/af6713e1ed8766d26faf472b.png",
+      "name": "demo-5.png",
+      "size": 1379031,
+      "mime": "image/png",
+      "title": "Домашний ужин",
+      "description": "Паста, свеча и разговоры допоздна. Идеальный вечер.",
+      "categories": [
+        "cat-food",
+        "cat-people"
+      ],
+      "createdAt": 1795178548792
+    },
+    {
+      "id": "m-demo-5",
+      "kind": "photo",
+      "url": "/uploads/02cae70b014c9495b8a1a6eb.png",
+      "name": "demo-6.png",
+      "size": 1102975,
+      "mime": "image/png",
+      "title": "Пробежка на закате",
+      "description": "Каждый километр давался легче, когда горизонт горел.",
+      "categories": [
+        "cat-sport",
+        "cat-nature"
+      ],
+      "createdAt": 1795182148792
+    },
+    {
+      "id": "m-demo-6",
+      "kind": "photo",
+      "url": "/uploads/27b29fa4c6274a35c73f4b0a.png",
+      "name": "demo-7.png",
+      "size": 1288859,
+      "mime": "image/png",
+      "title": "Карта прошлого лета",
+      "description": "Отмеченные точки, где мы были — и куда вернёмся.",
+      "categories": [
+        "cat-travel"
+      ],
+      "createdAt": 1795185748792
+    },
+    {
+      "id": "m-demo-7",
+      "kind": "photo",
+      "url": "/uploads/d6eb1aff1bde50baae833317.png",
+      "name": "demo-8.png",
+      "size": 1360518,
+      "mime": "image/png",
+      "title": "Пламя костра",
+      "description": "Смотреть на огонь — лучший способ ничего не думать.",
+      "categories": [
+        "cat-night",
+        "cat-nature"
+      ],
+      "createdAt": 1795189348792
+    },
+    {
+      "id": "m-demo-8",
+      "kind": "photo",
+      "url": "/uploads/b4b61c6d5052fb8ec455dab3.png",
+      "name": "demo-9.png",
+      "size": 1382033,
+      "mime": "image/png",
+      "title": "Портрет в тёплом свете",
+      "description": "Золотой час — лучший фотограф в мире.",
+      "categories": [
+        "cat-people"
+      ],
+      "createdAt": 1795192948792
+    },
+    {
+      "id": "m-demo-9",
+      "kind": "photo",
+      "url": "/uploads/db875afd1dc56c4c65621be8.png",
+      "name": "demo-10.png",
+      "size": 1161205,
+      "mime": "image/png",
+      "title": "Улочка Старого города",
+      "description": "Камни ещё помнят жару прошлого дня.",
+      "categories": [
+        "cat-travel",
+        "cat-night"
+      ],
+      "createdAt": 1795196548792
+    },
+    {
+      "id": "m-demo-10",
+      "kind": "photo",
+      "url": "/uploads/d13ccd9f2e8bad4c0f1f3042.png",
+      "name": "demo-11.png",
+      "size": 1330357,
+      "mime": "image/png",
+      "title": "Чашка кофе на рассвете",
+      "description": "Аромат, от которого просыпается даже самый сонный.",
+      "categories": [
+        "cat-food"
+      ],
+      "createdAt": 1795200148792
+    },
+    {
+      "id": "m-demo-11",
+      "kind": "photo",
+      "url": "/uploads/1c4cad355c3693c83510105d.png",
+      "name": "demo-12.png",
+      "size": 1349657,
+      "mime": "image/png",
+      "title": "Сила и ветер",
+      "description": "Тренировка заканчивается там, где заканчивается солнце.",
+      "categories": [
+        "cat-sport"
+      ],
+      "createdAt": 1795203748792
+    }
+  ],
+  "categories": [
+    {
+      "id": "cat-people",
+      "name": "Люди",
+      "emoji": "🧑",
+      "color": "#ff6a00"
+    },
+    {
+      "id": "cat-nature",
+      "name": "Природа",
+      "emoji": "🌿",
+      "color": "#ff9a3c"
+    },
+    {
+      "id": "cat-travel",
+      "name": "Путешествия",
+      "emoji": "✈️",
+      "color": "#ffb347"
+    },
+    {
+      "id": "cat-food",
+      "name": "Еда",
+      "emoji": "🍜",
+      "color": "#e85d04"
+    },
+    {
+      "id": "cat-night",
+      "name": "Ночь",
+      "emoji": "🌙",
+      "color": "#c2410c"
+    },
+    {
+      "id": "cat-sport",
+      "name": "Спорт",
+      "emoji": "🔥",
+      "color": "#f97316"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "ember-gallery",
+  "version": "1.0.0",
+  "description": "Warm orange photo & video gallery with categories",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "multer": "^2.5.0"
+  }
+}
