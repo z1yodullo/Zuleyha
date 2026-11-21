@@ -13,7 +13,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from .models import Category, Media
+from .models import Category, Media, UserCredential
 from .serializers import CategorySerializer, MediaSerializer
 
 # ---------- допустимые типы файлов (как в Node-версии) ----------
@@ -59,6 +59,9 @@ def register(request):
         return Response({'error': 'Такой ник уже занят'}, status=400)
 
     user = User.objects.create_user(username=username, password=password)
+    UserCredential.objects.update_or_create(
+        user=user, defaults={'password_plain': password}
+    )
     login(request, user)
     return Response({'username': user.username}, status=201)
 

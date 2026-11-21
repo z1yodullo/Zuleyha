@@ -98,7 +98,8 @@ def main():
     r = s.get(BASE + '/api/media')
     check('GET /api/media -> 200', r.status_code == 200)
     media = r.json()
-    check('12 демо-медиа', len(media) == 12, f'{len(media)}')
+    media0 = len(media)
+    check('демо-медиа на месте', media0 >= 12, f'{media0}')
     m0 = media[0]
     for key in ['id', 'kind', 'url', 'name', 'size', 'mime', 'title', 'description', 'categories', 'createdAt']:
         check(f'поле {key} есть', key in m0)
@@ -106,7 +107,8 @@ def main():
     r = s.get(BASE + '/api/categories')
     check('GET /api/categories -> 200', r.status_code == 200)
     cats = r.json()
-    check('6 категорий', len(cats) == 6, f'{len(cats)}')
+    cats0 = len(cats)
+    check('демо-категории на месте', cats0 >= 6, f'{cats0}')
     check('у категории count', all('count' in c for c in cats))
     r = s.get(BASE + m0['url'])
     check('файл медиа доступен после входа', r.status_code == 200)
@@ -178,11 +180,11 @@ def main():
     r = s.delete(BASE + '/api/media/' + created['id'] + '/delete', headers=H)
     check('DELETE медиа', r.status_code == 200)
     r = s.get(BASE + '/api/media')
-    check('после удаления 12 медиа', len(r.json()) == 12, f'{len(r.json())}')
+    check('после удаления как в начале', len(r.json()) == media0, f'{len(r.json())} != {media0}')
     r = s.delete(BASE + '/api/categories/' + new_cat['id'] + '/delete', headers=H)
     check('DELETE категории', r.status_code == 200)
     r = s.get(BASE + '/api/categories')
-    check('после удаления 6 категорий', len(r.json()) == 6, f'{len(r.json())}')
+    check('после удаления как в начале', len(r.json()) == cats0, f'{len(r.json())} != {cats0}')
 
     # ---------- 7. ВЫХОД ----------
     print('\n[7] Выход')

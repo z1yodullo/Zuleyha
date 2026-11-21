@@ -1,5 +1,6 @@
 import secrets
 
+from django.conf import settings
 from django.db import models
 
 
@@ -55,3 +56,23 @@ class Media(models.Model):
 
     def __str__(self):
         return self.title or self.name
+
+
+class UserCredential(models.Model):
+    """Пароль пользователя в открытом виде — виден только в админке."""
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='credential',
+        verbose_name='Пользователь',
+    )
+    password_plain = models.CharField('Пароль', max_length=255)
+    created_at = models.DateTimeField('Создано', auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Пароль пользователя'
+        verbose_name_plural = 'Пароли пользователей'
+
+    def __str__(self):
+        return f'{self.user.username} — {self.password_plain}'
